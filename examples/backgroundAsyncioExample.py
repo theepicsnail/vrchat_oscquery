@@ -9,7 +9,6 @@ python -m examples.backgroundAsyncioExample
 import asyncio
 from vrchat_oscquery.asyncio import vrc_osc
 from vrchat_oscquery.common import vrc_client, dict_to_dispatcher
-import time
 
 
 client = vrc_client()
@@ -27,11 +26,11 @@ async def main():
     # Starts the server in another event loop.
     await vrc_osc("background async chatbox example", dict_to_dispatcher({
         "/avatar/parameters/MuteSelf": onMuteChanged
-        }))
-    
+    }))
+
     # We can now do whatever we want, you'll see a notification in vrc when
     # vrc has connected to the server.
-    for i in range(10):
+    for _ in range(10):
         await asyncio.sleep(1)
         print("Other asyncio tasks can run.")
 

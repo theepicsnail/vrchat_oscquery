@@ -5,12 +5,13 @@ from vrchat_oscquery.common import _unused_port,  _oscjson_response, _create_ser
 import json
 import os
 
+
 class Proxy:
-    def __init__(self, name:str, port:int):
+    def __init__(self, name: str, port: int):
         self.name = name
         self.port = port
-        self.root_req = False # Have we sent the response for /
-        self.host_req = False # Have we sent the response for /?HOST_INFO
+        self.root_req = False  # Have we sent the response for /
+        self.host_req = False  # Have we sent the response for /?HOST_INFO
         self.http_server = web.Application()
         self.http_server.add_routes([web.get("/", self.handle_request)])
         self.runner = web.AppRunner(self.http_server)
@@ -30,7 +31,7 @@ class Proxy:
             self.host_req = True
 
         return web.Response(body=_oscjson_response(req.path_qs, self.port))
-    
+
     async def shutdown_after_delivery(self):
         while True:
             await asyncio.sleep(1)
@@ -38,6 +39,7 @@ class Proxy:
                 print(f"[Ready] {self.name}")
                 await self.http_server.shutdown()
                 return
+
 
 def main():
     if not os.path.exists("config.json"):
@@ -53,7 +55,7 @@ def main():
             for name, port in json.load(i).items():
                 routines.append(Proxy(name, port).forward())
             asyncio.get_event_loop().run_until_complete(asyncio.gather(*routines))
-    
+
+
 if __name__ == "__main__":
     main()
-    

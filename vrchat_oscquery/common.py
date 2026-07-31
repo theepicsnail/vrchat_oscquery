@@ -9,15 +9,19 @@ APP_HOST = "127.0.0.1"
 VRC_HOST = "127.0.0.1"
 VRC_PORT = 9000
 
+
 def _get_app_host() -> str:
     return APP_HOST
+
 
 def guess_host_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(('1.1.1.1', 0))
     return s.getsockname()[0]
 
+
 APP_HOST = guess_host_ip()
+
 
 def _oscjson_response(request_path: str, osc_port: int) -> str:
     """Super specific to VRChat hack for responding to the two requests it sends.
@@ -37,13 +41,6 @@ def _oscjson_response(request_path: str, osc_port: int) -> str:
             }
         }
     return json.dumps(obj)
-
-
-def _unused_port() -> int:
-    """Returns an unused port."""
-    sock = socket.socket()
-    sock.bind(("", 0))
-    return sock.getsockname()[1]
 
 
 def _create_service_info(service_name: str, http_port: int) -> ServiceInfo:

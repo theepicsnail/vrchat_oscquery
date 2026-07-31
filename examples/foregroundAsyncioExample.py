@@ -9,7 +9,6 @@ python -m examples.foregroundAsyncioExample
 import asyncio
 from vrchat_oscquery.asyncio import vrc_osc
 from vrchat_oscquery.common import vrc_client, dict_to_dispatcher
-import time
 
 
 client = vrc_client()

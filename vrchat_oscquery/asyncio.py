@@ -3,20 +3,19 @@ from aiohttp import web
 from zeroconf.asyncio import AsyncZeroconf
 from pythonosc.osc_server import AsyncIOOSCUDPServer
 from pythonosc.dispatcher import Dispatcher
-from .common import _unused_port,  _oscjson_response, _create_service_info, _get_app_host
+from .common import _oscjson_response, _create_service_info, _get_app_host
 
 
 async def vrc_osc(name: str, dispatcher: Dispatcher, foreground=False):
-    osc_port = _unused_port()
-    http_port = _unused_port()
     host = _get_app_host()
 
-    await AsyncZeroconf().async_register_service(_create_service_info(name, http_port))
+    # Setup OSC server on a free port.
+    osc_server = AsyncIOOSCUDPServer(
+        (host, 0), dispatcher, asyncio.get_event_loop())
+    osc_transport, _osc_protocol = await osc_server.create_serve_endpoint()
+    _osc_host, osc_port = osc_transport.get_extra_info("sockname")
 
-    await AsyncIOOSCUDPServer(
-        (host, osc_port), dispatcher, asyncio.get_event_loop()
-    ).create_serve_endpoint()
-
+    # Setup OscQuery server on a free port.
     app = web.Application()
 
     def req_handler(req):
@@ -25,7 +24,11 @@ async def vrc_osc(name: str, dispatcher: Dispatcher, foreground=False):
     app.add_routes([web.get("/", req_handler)])
     runner = web.AppRunner(app)
     await runner.setup()
-    await web.TCPSite(runner, host, http_port).start()
+    site = web.TCPSite(runner, host, 0)
+    await site.start()
+
+    # Setup ZeroConf to announce the OscQuery server.
+    await AsyncZeroconf().async_register_service(_create_service_info(name, site.port))
 
     if foreground:
         await asyncio.gather(*asyncio.all_tasks())

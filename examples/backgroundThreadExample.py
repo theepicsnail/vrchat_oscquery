@@ -13,30 +13,30 @@ import time
 
 client = vrc_client()
 
+
 def onMuteChanged(unused_osc_addr, muted):
     """Called when the client mutes/unmutes."""
     if muted:
         client.send_message('/chatbox/input', ("Muted", True, False))
     else:
         client.send_message('/chatbox/input', ("Unmuted", True, False))
-        
+
+
 def backgroundThreadExample():
     # Starts the server in another thread.
-    server = vrc_osc("background chatbox example", dict_to_dispatcher({
+    server = vrc_osc("background thread chatbox example", dict_to_dispatcher({
         "/avatar/parameters/MuteSelf": onMuteChanged
     }))
-    
+
     # We can now do whatever we want, you'll see a notification in vrc when
     # vrc has connected to the server.
-    for i in range(30):
+    for _ in range(30):
         time.sleep(1)
         print("Idle in main thread...")
 
-    
     print("Shutting down")
     server.shutdown()
-    
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     backgroundThreadExample()
-    
